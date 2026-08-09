@@ -29,7 +29,7 @@ resources_syllabus_official_buttons = [[InlineKeyboardButton(x, callback_data=f"
 resources_syllabus_official_buttons.append([InlineKeyboardButton("Cancel", callback_data="resources:cancel")])
 resources_syllabus_official_keyboard = InlineKeyboardMarkup(resources_syllabus_official_buttons)
 
-resources_syllabus_unofficial_buttons = [[InlineKeyboardButton(x, callback_data=f"resources:syllabus:unofficial:{x}") for x in available_syllabus_official]]
+resources_syllabus_unofficial_buttons = [[InlineKeyboardButton(x, callback_data=f"resources:syllabus:unofficial:{x}") for x in available_syllabus_unofficial]]
 resources_syllabus_unofficial_buttons.append([InlineKeyboardButton("Cancel", callback_data="resources:cancel")])
 resources_syllabus_unofficial_keyboard = InlineKeyboardMarkup(resources_syllabus_unofficial_buttons)
 
@@ -131,12 +131,13 @@ async def syllabus_id_handler(update:Update, context:ContextTypes) -> None:
 
 
 def list_user():
+    user_data = {}
     if os.path.exists(user_data_path):
         with open(user_data_path, "r") as file:
             user_data = json.load(file)
     user_list_text = ""
     for user, data in user_data.items():
-        if data["user_id"] != None:
+        if data["user_id"] is not None:
             user_list_text += f"{user} : {data['user_id']}\n"
     
     return user_list_text

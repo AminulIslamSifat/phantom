@@ -178,7 +178,7 @@ def _build_experiment_keyboard(experiments: dict) -> InlineKeyboardMarkup:
     """One experiment per row ('Exp N: Title'), plus manual entry, then footer."""
     rows = []
     for exp_no, detail in experiments.items():
-        title = detail.get("title", "")
+        title = detail.get("title", "") if isinstance(detail, dict) else str(detail)
         label = f"Exp {exp_no}: {title[:40]}{'…' if len(title) > 40 else ''}"
         rows.append([InlineKeyboardButton(label, callback_data=f"coverpage:exp:{exp_no}")])
     rows.append([InlineKeyboardButton("✏️ Enter Manually", callback_data="coverpage:exp:manual")])
@@ -264,6 +264,7 @@ async def cp_subject_selected(update: Update, context: ContextTypes) -> str:
     query = update.callback_query
     await query.answer()
 
+    print(query.data)
     subject = query.data.removeprefix("coverpage:subject:")
     context.user_data["cp_subject"] = subject
 
@@ -323,8 +324,8 @@ async def cp_experiment_selected(update: Update, context: ContextTypes) -> str:
     detail = experiments.get(exp_no, {})
 
     context.user_data["cp_exp_no"] = exp_no
-    context.user_data["cp_exp_title"] = detail.get("title", "")
-    context.user_data["cp_exp_type"] = detail.get("type", "Lab Report")
+    context.user_data["cp_exp_title"] = detail.get("title", "") if isinstance(detail, dict) else str(detail)
+    context.user_data["cp_exp_type"] = detail.get("type", "Lab Report") if isinstance(detail, dict) else "Lab Report"
 
     return await _ask_for_dates(query, context)
 
@@ -380,7 +381,7 @@ async def _build_date_ui(context: ContextTypes) -> tuple[str, InlineKeyboardMark
 
     rows = []
     if subject and exp_no:
-        records = get_coverpage_dates_by_group(subject, exp_no)
+        records = await get_coverpage_dates_by_group(subject, exp_no)
         for group_key, label in (("1", "1st 30"), ("2", "2nd 30")):
             rec = records.get(group_key)
             if not rec:

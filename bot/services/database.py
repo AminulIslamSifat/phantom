@@ -80,6 +80,9 @@ def load_routine_odd_even_sequence():
     try:
         routine_collection = db["routine_week_selector"]
         routine_week_data = routine_collection.find_one({"id": "routine_week_selector"})
+        if not routine_week_data:
+            print("[db] No routine_week_selector document found, using default 'odd'.")
+            routine_week_data = {"id": "routine_week_selector", "week": "odd"}
         data = {
             "id" : routine_week_data["id"],
             "week": routine_week_data["week"]
@@ -177,7 +180,7 @@ async def save_coverpage_record(
         print(f"[db] Error saving coverpage record: {e}")
 
 
-def get_coverpage_dates_by_group(subject: str, exp_no: str) -> dict:
+async def get_coverpage_dates_by_group(subject: str, exp_no: str) -> dict:
     """
     Return the most recent cover page record for each roll group ('1' and '2')
     for a given subject + experiment number.
@@ -188,7 +191,8 @@ def get_coverpage_dates_by_group(subject: str, exp_no: str) -> dict:
     result = {"1": None, "2": None}
     try:
         for group in ("1", "2"):
-            record = _coverpage_col.find_one(
+            record = await run_db(
+                _coverpage_col.find_one,
                 {"subject": subject, "exp_no": str(exp_no), "group": group},
                 sort=[("generated_at", -1)],
             )

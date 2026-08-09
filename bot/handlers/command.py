@@ -26,12 +26,13 @@ help_keyboard = InlineKeyboardMarkup([
 async def start(update:Update, context: ContextTypes) -> None:
     user_id = update.effective_user.id
     active_user = []
+    user_data = {}
     if os.path.exists(user_data_path):
         with open(user_data_path, "r") as file:
             user_data = json.load(file)
     
     for user, data in user_data.items():
-        if data["user_id"] != None:
+        if data["user_id"] is not None:
             active_user.append(data["user_id"])
     
     if user_id not in active_user:

@@ -42,7 +42,10 @@ from bot.handlers.coverpage import (
     ENTER_DATES,
 )
 import asyncio
+import logging
+import traceback
 
+logger = logging.getLogger(__name__)
 
 TOKEN = TELEGRAM_BOT_TOKEN
 async def post_init(app):
@@ -135,6 +138,14 @@ def register_handlers(application):
 
     # Universal message handler
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
+
+    # Error handler — log full traceback so nothing dies silently
+    async def _error_handler(update: object, context) -> None:
+        tb = "".join(traceback.format_exception(None, context.error, context.error.__traceback__))
+        logger.error(f"Unhandled exception:\n{tb}")
+        print(f"[ERROR] {tb}", flush=True)
+
+    application.add_error_handler(_error_handler)
 
 
 app = build_app()

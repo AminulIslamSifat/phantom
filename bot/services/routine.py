@@ -78,8 +78,6 @@ def update_routine() -> None:
     try:
         print("Routine Update started...")
         os.makedirs("resources/routine", exist_ok=True)
-        ROUTINE_URL_ODD_WEEK = "https://ruet-cse-liart.vercel.app/routine/odd"
-        ROUTINE_URL_EVEN_WEEK = "https://ruet-cse-liart.vercel.app/routine/even"
         take_web_screenshot(ROUTINE_URL_ODD_WEEK, output_path=routine_path_odd_week)
         take_web_screenshot(ROUTINE_URL_EVEN_WEEK, output_path=routine_path_even_week)
         _save_last_sync_time(_latest_routine_updated_at() or _utc_now())
@@ -214,5 +212,3 @@ async def circulate_routine(update: Update, context: ContextTypes) -> None:
     await msg.edit_text(f"Routine circulated to {success_count}/{len(active_users)} people. ✅")
 
 
-
-update_routine()

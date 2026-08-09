@@ -36,20 +36,23 @@ async def recieve_notice(update:Update, context:ContextTypes) -> None:
             user_data = json.load(file)
     active_users = []
     for user, data in user_data.items():
-        if data["user_id"] != None:
+        if data["user_id"] is not None:
             active_users.append(data["user_id"])
 
     count = 0
-    message = await update.message.reply_text(f"Please wait...\nThe routine is been sent to {count} person")
+    message = await update.message.reply_text(f"Please wait...\nThe notice is being sent to {len(active_users)} people")
 
     for user_id in active_users:
-        await context.bot.send_message(
-            chat_id = int(user_id),
-            text = "NOTICE:\n\n" + text
-        )
+        try:
+            await context.bot.send_message(
+                chat_id = int(user_id),
+                text = "NOTICE:\n\n" + text
+            )
+        except Exception as e:
+            print(f"Error sending notice to {user_id}: {e}")
         count += 1
-        await message.edit_text(f"Please wait...\nThe notice is been sent to {count} person")
-    await message.edit_text(f"The notice is circulated to {len(active_users)} people.")
+        await message.edit_text(f"Please wait...\nThe notice has been sent to {count} person")
+    await message.edit_text(f"The notice is circulated to {count}/{len(active_users)} people.")
     return ConversationHandler.END
 
 

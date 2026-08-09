@@ -34,12 +34,14 @@ available_g_classroom = {
 }
 available_syllabus_official = {}
 available_syllabus_unofficial = {}
-for file in Path(syllabus_official_folder).iterdir():
-    if file.is_file():
-        available_syllabus_official[file.stem] = str(file.resolve())
-for file in Path(syllabus_unofficial_folder).iterdir():
-    if file.is_file():
-        available_syllabus_unofficial[file.stem] = str(file.resolve())
+if Path(syllabus_official_folder).exists():
+    for file in Path(syllabus_official_folder).iterdir():
+        if file.is_file():
+            available_syllabus_official[file.stem] = str(file.resolve())
+if Path(syllabus_unofficial_folder).exists():
+    for file in Path(syllabus_unofficial_folder).iterdir():
+        if file.is_file():
+            available_syllabus_unofficial[file.stem] = str(file.resolve())
 MONGODB_USERNAME = urllib.parse.quote_plus(os.environ["MONGODB_USERNAME"])
 MONGODB_USER_PASSWORD = urllib.parse.quote_plus(os.environ["MONGODB_USER_PASSWORD"])
 mdb_client = MongoClient(f"mongodb+srv://{MONGODB_USERNAME}:{MONGODB_USER_PASSWORD}@cluster0.5ckeilq.mongodb.net/?appName=Cluster0")

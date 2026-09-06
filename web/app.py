@@ -228,6 +228,50 @@ def create_app(url_prefix: str = "") -> Flask:
             return jsonify({"error": str(e)}), 500
 
     # ────────────────────────────────────────────────────────────────────────
+    # Public read-only schedule feed (no auth; consumed by external apps)
+    # ────────────────────────────────────────────────────────────────────────
+
+    _public_schedule_cache: dict = {"data": None, "expires_at": None}
+
+    @app.route("/api/public/schedule")
+    def public_schedule():
+        now = datetime.now(timezone.utc)
+        docs = _public_schedule_cache["data"]
+        if docs is None or _public_schedule_cache["expires_at"] <= now:
+            docs = []
+            for col_name in schedule_db.list_collection_names():
+                if col_name.startswith("system."):
+                    continue
+                if col_name == "ct":
+                    display_type = "CT"
+                elif col_name == "assignment":
+                    display_type = "Assignment"
+                elif col_name == "semester_final":
+                    display_type = "Semester Final"
+                elif col_name == "backlog":
+                    display_type = "Backlog"
+                else:
+                    display_type = col_name.replace("_", " ").title()
+                for doc in schedule_db[col_name].find():
+                    docs.append({
+                        "type": display_type,
+                        "subject": doc.get("subject") or "",
+                        "date": (doc.get("date") or "").strip(),
+                        "time": (doc.get("time") or "").strip(),
+                        "teacher": doc.get("teacher") or "",
+                        "topic": doc.get("topic") or "",
+                        "syllabus": doc.get("syllabus") or "",
+                    })
+            docs.sort(key=lambda s: (s["date"] or "9999-12-31", s["time"]))
+            _public_schedule_cache["data"] = docs
+            _public_schedule_cache["expires_at"] = now + timedelta(seconds=300)
+
+        resp = jsonify(docs)
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        resp.headers["Cache-Control"] = "public, max-age=300"
+        return resp
+
+    # ────────────────────────────────────────────────────────────────────────
     # Schedule CRUD
     # ────────────────────────────────────────────────────────────────────────
 

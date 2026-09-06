@@ -7,9 +7,9 @@ from pathlib import Path
 from datetime import datetime
 
 
-async def run_db(func, *args):
+async def run_db(func, *args, **kwargs):
     """Run a synchronous pymongo call in a thread so it doesn't block asyncio."""
-    return await asyncio.to_thread(func, *args)
+    return await asyncio.to_thread(func, *args, **kwargs)
 
 
 
